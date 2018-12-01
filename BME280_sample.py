@@ -56,7 +56,7 @@ def get_calib_param():
 
 	for i in range(0,6):
 		if digH[i] & 0x8000:
-			digH[i] = (-digH[i] ^ 0xFFFF) + 1  
+			digH[i] = (-digH[i] ^ 0xFFFF) + 1
 
 def readData():
 	data = []
@@ -66,9 +66,11 @@ def readData():
 	temp_raw = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4)
 	hum_raw  = (data[6] << 8)  |  data[7]
 	
-	compensate_T(temp_raw)
-	compensate_P(pres_raw)
-	compensate_H(hum_raw)
+	temp = compensate_T(temp_raw)
+	pres = compensate_P(pres_raw)
+	hum  = compensate_H(hum_raw)
+	
+	return temp,pres,hum
 
 def compensate_P(adc_P):
 	global  t_fine
@@ -90,9 +92,11 @@ def compensate_P(adc_P):
 		pressure = (pressure / v1) * 2
 	v1 = (digP[8] * (((pressure / 8.0) * (pressure / 8.0)) / 8192.0)) / 4096
 	v2 = ((pressure / 4.0) * digP[7]) / 8192.0
-	pressure = pressure + ((v1 + v2 + digP[6]) / 16.0)  
+	pressure = pressure + ((v1 + v2 + digP[6]) / 16.0)
     
 	print("pressure : %7.2f hPa" % (pressure/100))
+	
+	return pressure/100
 
 def compensate_T(adc_T):
 	global t_fine
@@ -101,6 +105,7 @@ def compensate_T(adc_T):
 	t_fine = v1 + v2
 	temperature = t_fine / 5120.0
 	print ("temp : %-6.2f ℃" % (temperature))
+	return temperature
 
 def compensate_H(adc_H):
 	global t_fine
@@ -115,7 +120,7 @@ def compensate_H(adc_H):
 	elif var_h < 0.0:
 		var_h = 0.0
 	print ("hum : %6.2f ％" % (var_h))
-
+	return var_h
 
 def setup():
 	osrs_t = 1			#Temperature oversampling x 1
