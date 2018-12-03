@@ -7,6 +7,7 @@ import time
 LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
 LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 
+Error_flag = False
 #interval of measureing temp
 interval = 0.5
 #init LCD
@@ -19,12 +20,20 @@ try:
 		#Test Read Weather Data
 		#print(Weather_data)
 		#print(type(Weather_data))
+		try:
+			if Error_flag:
+				lcd.lcd_init()
+				Error_flag = False
+			#Read BME280 Data
+			temp,hum,pres = BME280.readData()
+			#print(temp)
 
-		#Read BME280 Data
-		temp,hum,pres = BME280.readData()
-
-		lcd.lcd_string("T "+"{0:3.1f}".format(temp)+"C H "+"{0:3.1f}".format(hum)+"%",LCD_LINE_1)
-		lcd.lcd_string("Press "+"{0:5.1f}".format(pres)+"hPa",LCD_LINE_2)
+			lcd.lcd_string("T "+"{0:3.1f}".format(temp)+"C H "+"{0:3.1f}".format(hum)+"%",LCD_LINE_1)
+			lcd.lcd_string("Press "+"{0:5.1f}".format(pres)+"hPa",LCD_LINE_2)
+		except IOError:
+			print("IOError")
+			Error_flag = True
+		
 		
 		time.sleep(interval)
 except KeyboardInterrupt:
