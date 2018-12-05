@@ -3,6 +3,7 @@
 import BME280_sample as BME280
 import lcd_i2c as lcd
 import time
+import datetime
 
 LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
 LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
@@ -23,6 +24,8 @@ try:
 		try:
 			if Error_flag:
 				lcd.lcd_init()
+				BME280.setup()
+				BME280.get_calib_param()
 				Error_flag = False
 			#Read BME280 Data
 			temp,hum,pres = BME280.readData()
