@@ -9,6 +9,9 @@ import csv
 LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
 LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 
+#BKC height
+height = 150
+
 Error_flag = False
 #interval of measureing temp
 interval = 0.5
@@ -33,9 +36,11 @@ try:
 			#Read BME280 Data
 			temp,hum,pres = BME280.readData()
 			#print(temp)
+			#pres_zero = zero height pres
+			pres_zero = pres*pow((1-0.0065*height/(temp + 0.0065*height+273.15)),-5.257)
 
 			lcd.lcd_string("T "+"{0:3.1f}".format(temp)+"C H "+"{0:3.1f}".format(hum)+"%",LCD_LINE_1)
-			lcd.lcd_string("Press "+"{0:5.1f}".format(pres)+"hPa",LCD_LINE_2)
+			lcd.lcd_string("Press "+"{0:5.1f}".format(pres_zero)+"hPa",LCD_LINE_2)
 		except IOError:
 			print("IOError")
 			Error_flag = True
@@ -47,7 +52,7 @@ try:
 		if(now.minute != keep_minute):
 			#print('csv write')
 			#make temp data list by list
-			temp_data_list = [now.strftime("%Y/%m/%d %H:%M"),temp,hum,pres]
+			temp_data_list = [now.strftime("%Y/%m/%d %H:%M"),temp,hum,pres_zero]
 
 			data_file_name = 'temp_data/' + now.strftime("%Y_%m_%d") + ".csv"
 			with open(data_file_name,'a') as f:
