@@ -4,6 +4,7 @@ import BME280_sample as BME280
 import lcd_i2c as lcd
 import time
 import datetime
+import csv
 
 LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
 LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
@@ -13,6 +14,8 @@ Error_flag = False
 interval = 0.5
 #init LCD
 lcd.lcd_init()
+#keep minute
+keep_minute = -1
 
 try:
 	while True:
@@ -36,9 +39,24 @@ try:
 		except IOError:
 			print("IOError")
 			Error_flag = True
+
+		now = datetime.datetime.now()
+		#now to str
+		#now.strftime("%Y/%m/%d %H:%M:%S")
 		
+		if(now.minute != keep_minute):
+			#print('csv write')
+			#make temp data list by list
+			temp_data_list = [now.strftime("%Y/%m/%d %H:%M"),temp,hum,pres]
+
+			data_file_name = 'temp_data/' + now.strftime("%Y_%m_%d") + ".csv"
+			with open(data_file_name,'a') as f:
+				writer = csv.writer(f,lineterminator='\n')
+				writer.writerow(temp_data_list)
+			keep_minute = now.minute
 		
 		time.sleep(interval)
 except KeyboardInterrupt:
+	time.sleep(0.01)
 	lcd.lcd_byte(0x01,0)
 
