@@ -1,7 +1,9 @@
 #cal Temp Program
 
-import BME280_sample as BME280
-import lcd_i2c as lcd
+import pycode
+
+import pycode.BME280_sample as BME280
+import pycode.lcd_i2c as lcd
 import time
 import datetime
 import csv
@@ -10,9 +12,9 @@ LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
 LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 
 #BKC height
-height = 150
+height = 81
 
-Error_flag = False
+Error_flag = True
 #interval of measureing temp
 interval = 0.5
 #init LCD
@@ -30,8 +32,8 @@ try:
 		try:
 			if Error_flag:
 				lcd.lcd_init()
-				BME280.setup()
-				BME280.get_calib_param()
+				#BME280.setup()
+				#BME280.get_calib_param()
 				Error_flag = False
 			#Read BME280 Data
 			temp,hum,pres = BME280.readData()
