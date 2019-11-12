@@ -14,11 +14,12 @@ LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 #BKC height
 height = 81
 
-Error_flag = True
+BME_Error_flag = False
+LCD_Error_flag = True
 #interval of measureing temp
 interval = 0.5
 #init LCD
-lcd.lcd_init()
+#lcd.lcd_init()
 #keep minute
 keep_minute = -1
 
@@ -30,22 +31,32 @@ try:
 		#print(Weather_data)
 		#print(type(Weather_data))
 		try:
-			if Error_flag:
-				lcd.lcd_init()
+			if BME_Error_flag:
 				#BME280.setup()
 				#BME280.get_calib_param()
-				Error_flag = False
+				BME_Error_flag = False
 			#Read BME280 Data
 			temp,hum,pres = BME280.readData()
-			#print(temp)
+			#print(pres)
 			#pres_zero = zero height pres
 			pres_zero = pres*pow((1-0.0065*height/(temp + 0.0065*height+273.15)),-5.257)
 
+		except IOError:
+			print("BME_IOError")
+			BME_Error_flag = True
+
+		try:
+			if LCD_Error_flag:
+				lcd.lcd_init()
+				LCD_Error_flag = False
+
 			lcd.lcd_string("T "+"{0:3.1f}".format(temp)+"C H "+"{0:3.1f}".format(hum)+"%",LCD_LINE_1)
 			lcd.lcd_string("Press "+"{0:5.1f}".format(pres_zero)+"hPa",LCD_LINE_2)
+
 		except IOError:
-			print("IOError")
-			Error_flag = True
+			print("LCD_IOError")
+			LCD_Error_flag = True
+
 
 		now = datetime.datetime.now()
 		#now to str
